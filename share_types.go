@@ -33,6 +33,37 @@ type Share struct {
 	Key                 string // The private ShareKey, encrypted with a passphrase
 	Passphrase          string // The encrypted passphrase
 	PassphraseSignature string // The signature of the passphrase
+
+	Memberships []ShareMembership // Memberships of this share (present for shares the user is a member of)
+}
+
+// ShareMembership ties a share to a member address. For shared-with-me shares,
+// KeyPacket holds the share passphrase session key encrypted to the member's address key.
+type ShareMembership struct {
+	MemberID     string
+	ShareID      string
+	AddressID    string
+	AddressKeyID string
+
+	Inviter     string // Inviter email address
+	Permissions int    // Permission bitmap (4 = read, 2 = write)
+
+	KeyPacket           string // base64 PGP key packet of the share passphrase, for the member's address key
+	KeyPacketSignature  string
+	SessionKeySignature string
+
+	State int
+
+	CreateTime int64
+	ModifyTime int64
+}
+
+// SharedWithMeLink identifies a share that another user has shared with this user.
+type SharedWithMeLink struct {
+	VolumeID        string
+	ShareID         string
+	LinkID          string
+	ShareTargetType int
 }
 
 func (s Share) GetKeyRing(addrKR *crypto.KeyRing) (*crypto.KeyRing, error) {
