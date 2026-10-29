@@ -47,6 +47,11 @@ func (c *Client) CreateFile(ctx context.Context, shareID string, req CreateFileR
 	})
 	if err != nil { // if the status code is not 200~299, it's considered an error
 
+		// resp is nil when no response arrived (network error, context canceled)
+		if resp == nil {
+			return CreateFileRes{}, err
+		}
+
 		// handle the file or folder name exists error
 		if resp.StatusCode() == http.StatusUnprocessableEntity /* 422 */ {
 			var apiError APIError
@@ -86,6 +91,11 @@ func (c *Client) CreateFolder(ctx context.Context, shareID string, req CreateFol
 		return r.SetResult(&res).SetBody(req).Post("/drive/shares/" + shareID + "/folders")
 	})
 	if err != nil { // if the status code is not 200~299, it's considered an error
+
+		// resp is nil when no response arrived (network error, context canceled)
+		if resp == nil {
+			return CreateFolderRes{}, err
+		}
 
 		// handle the file or folder name exists error
 		if resp.StatusCode() == http.StatusUnprocessableEntity /* 422 */ {
